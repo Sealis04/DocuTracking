@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Documents {
+  id           Int       @id @default(autoincrement())
+  ctrlNo       Int       @unique
+  adminCtrlNo  Int?
+  particulars  String
+  recDate      DateTime  @default(now())
+  recId        Int
+  endorsedTo   String?
+  endorsedID   Int?
+  endorsedDate DateTime?
+  actionTaken  String?
+  actionDate   DateTime?
+  actionID     Int?
+  remarks      String?
+  remarksID    Int?
+  remarksDate  DateTime?
+  remarksUser  User?     @relation("remarksByUser", fields: [remarksID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actionUser   User?     @relation("actionedByUser", fields: [actionID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  endorsedUser User?     @relation("endorsedByUser", fields: [endorsedID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  recordUser   User      @relation("recordedByUser", fields: [recId], references: [id], onUpdate: NoAction)
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  userName   String      @unique
+  password   String
+  fName      String
+  mName      String?
+  lName      String
+  createdAt  DateTime    @default(now())
+  actionID   Documents[] @relation("actionedByUser")
+  endorsedID Documents[] @relation("endorsedByUser")
+  recordID   Documents[] @relation("recordedByUser")
+  remarksID  Documents[] @relation("remarksByUser")
+  isReset   Boolean     @default(false) 
+}
